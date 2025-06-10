@@ -1,0 +1,37 @@
+{
+  "pttavm_mysql": {
+    "host": "192.168.36.240",
+    "port": 3306,
+    "username": "epttavm",
+    "password": "42maXAPu",
+    "db": "epttavm"
+  },
+  "pttavm_mongo": {
+    "dsn": "mongodb://192.168.36.240"
+  },
+  "review_mongo": {
+    "dsn": "mongodb://192.168.36.240/epttavm"
+  },
+  "pttavm_elasticsearch": {
+    "host": "192.168.36.240",
+    "port": 9200,
+    "index": "epa_read",
+    "type": "main"
+  },
+  "commission_elasticsearch": {
+    "host": "192.168.36.240",
+    "port": 9200,
+    "index": "epa_read",
+    "type": "main"
+  },
+  "pttavm_rabbitmq": {
+    "host": "192.168.36.240",
+    "port": 5672,
+    "username": "rabbitmq",
+    "password": "rabbitmq",
+    "virtual_host": "epttavm",
+    "reconnection_interval": 10,
+    "reconnection_attempt": 3,
+    "connection_name": "toolbox"
+  }
+}
