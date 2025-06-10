@@ -1,0 +1,16 @@
+# IDE
+.idea/
+.DS_Store
+
+# Config files
+config.json
+config.production.json
+credentials.production.json
+deploy.sh
+
+# Build artifacts
+go_build_main_go
+toolbox
+
+# Assets directory
+assets/
