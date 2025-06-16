@@ -33,7 +33,7 @@ func (ecc *ExportCategoryCommissionCheckTable) Run() {
 	var data [][]string
 	for _, ccs := range categoryCommissionTable {
 		if _, ok := categories[ccs.CategoryId]; !ok {
-			fmt.Println("yohtır lo")
+			fmt.Println("yohtır lo", ccs.CategoryId)
 		} else {
 			category := categories[ccs.CategoryId]
 			if float64(category.DefaultCommissionRate) != ccs.CommissionRate {
@@ -43,9 +43,6 @@ func (ecc *ExportCategoryCommissionCheckTable) Run() {
 	}
 
 	helpers.Write("assets/commission/last_commission.csv", data)
-
-	fmt.Println(categories)
-
 }
 
 func (ecc *ExportCategoryCommissionCheckTable) getCategories() map[int64]entities.EvoCategories {

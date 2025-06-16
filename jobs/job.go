@@ -427,3 +427,7 @@ func (j *Job) ExportShopAggregation() IJob {
 func (j *Job) ProductListenerCleaner() IJob {
 	return &ProductListenerCleaner{Job: *j}
 }
+
+func (j *Job) CommissionServiceMigrate() IJob {
+	return &CommissionServiceMigrate{Job: *j}
+}

@@ -2,6 +2,7 @@ package models
 
 type CategoryCommissionTable struct {
 	CategoryId     int64   `json:"category_id"`
+	CategoryName   string  `json:"category_name"`
 	CommissionRate float64 `json:"commission_rate"`
 }
 

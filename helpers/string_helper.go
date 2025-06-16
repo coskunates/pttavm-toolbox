@@ -75,3 +75,12 @@ func RestoreKey(sanitizedKey string) string {
 	sanitizedKey = strings.ReplaceAll(sanitizedKey, "__DOLLAR__", "$")
 	return sanitizedKey
 }
+
+func CleanString(input string) string {
+	// a-zA-Z0-9 dışındaki karakterleri sil
+	reg, err := regexp.Compile(`[^a-zA-Z0-9]+`)
+	if err != nil {
+		panic(err)
+	}
+	return reg.ReplaceAllString(input, "")
+}
