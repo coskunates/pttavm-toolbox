@@ -18,7 +18,7 @@ type CommissionFixForShops struct {
 
 func (cf *CommissionFixForShops) Run() {
 	categories, categoryIds := cf.getCategories()
-	shopIds := []int64{519411}
+	shopIds := []int64{575486, 803469, 895509, 876649, 511788, 884909, 892949, 901309, 388928, 519201, 4835, 17153}
 
 	wg := sync.WaitGroup{}
 	for _, shopId := range shopIds {

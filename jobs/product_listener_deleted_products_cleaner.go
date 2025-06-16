@@ -37,7 +37,7 @@ func (plc *ProductListenerDeletedProductCleaner) getProducts(minId int) []entiti
 		"pl.* "+
 		"from product_listener_v2 pl "+
 		"left join e_prodotto_extra pe on pe.prodotto_id = pl.product_id "+
-		"where pe.out_of_sale = 1 AND pl.id > %d ORDER BY pl.id ASC limit 100", minId)
+		"where pe.out_of_sale = 1 AND pl.id > %d ORDER BY pl.id ASC limit 1000", minId)
 
 	var result []entities.ProductListenerV2
 	plc.DB.Raw(sql).Scan(&result)

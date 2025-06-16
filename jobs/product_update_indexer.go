@@ -23,7 +23,7 @@ func (pui *ProductUpdateIndexer) Run() {
 		productIds = append(productIds, productId)
 	}
 
-	chunks := pui.getChunks(productIds, 100)
+	chunks := pui.getChunks(productIds, 1000)
 	for _, chunk := range chunks {
 		updatedProducts := pui.updateProducts(chunk)
 		fmt.Println(fmt.Sprintf("Updated product count: %d", updatedProducts))
