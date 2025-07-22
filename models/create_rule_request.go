@@ -21,7 +21,7 @@ type CreateRuleRequest struct {
 	Description    string             `json:"description"`
 	Type           string             `json:"type"`
 	Metadata       *map[string]string `json:"metadata"`
-	TermInDays     int                `json:"term_in_days"`
+	TermInDays     int                `json:"term_in_days,omitempty"`
 	MerchantID     *int32             `json:"merchant_id"`
 	CommissionRate float64            `json:"commission_rate"`
 	RuleType       string             `json:"rule_type"`

@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/zap"
+	"golang.org/x/text/unicode/norm"
 	"io"
 	"my_toolbox/elasticsearch_entities"
+	"my_toolbox/entities"
 	"my_toolbox/helpers"
 	"my_toolbox/library/log"
 	"my_toolbox/models"
@@ -44,7 +46,7 @@ func (csm *CommissionServiceMigrate) getCategoryCommissions() []models.CategoryC
 		commissionRate, _ := strconv.ParseFloat(record[4], 64)
 		categoryCommissionTable = append(categoryCommissionTable, models.CategoryCommissionTable{
 			CategoryId:     categoryId,
-			CategoryName:   helpers.CleanString(record[3]),
+			CategoryName:   record[3],
 			CommissionRate: commissionRate,
 		})
 	}
@@ -104,12 +106,12 @@ func (csm *CommissionServiceMigrate) SendToNewCommissionService(request models.C
 
 func (csm *CommissionServiceMigrate) CreateCategoryCommissions(commissions []models.CategoryCommissionTable) {
 	for _, commission := range commissions {
+		commission.CategoryName = norm.NFC.String(commission.CategoryName)
 		resp, err := csm.SendToNewCommissionService(models.CreateRuleRequest{
-			Name:           fmt.Sprintf("%s Kategori Komisyonu", commission.CategoryName),
-			Description:    fmt.Sprintf("%s Kategori Komisyonu", commission.CategoryName),
+			Name:           fmt.Sprintf("%d - %s Kategori Komisyonu", commission.CategoryId, commission.CategoryName),
+			Description:    fmt.Sprintf("%d - %s Kategori Komisyonu", commission.CategoryId, commission.CategoryName),
 			Type:           "standard",
 			Metadata:       nil,
-			TermInDays:     1,
 			MerchantID:     nil,
 			CommissionRate: commission.CommissionRate,
 			RuleType:       "category",
@@ -240,6 +242,12 @@ func (csm *CommissionServiceMigrate) getShopCommissions() []elasticsearch_entiti
 }
 
 func (csm *CommissionServiceMigrate) CreateShopCommissions(commissions []elasticsearch_entities.Commission) {
+	var shopIds []int
+	for _, commission := range commissions {
+		shopIds = append(shopIds, commission.ShopId)
+	}
+
+	shopInfos := csm.getShopInfos(shopIds)
 	for _, commission := range commissions {
 
 		startDate := time.Now()
@@ -257,12 +265,18 @@ func (csm *CommissionServiceMigrate) CreateShopCommissions(commissions []elastic
 		if ratio == 0 && commission.Ratio > 0 {
 			ratio = commission.Ratio
 		}
+
+		name := fmt.Sprintf("%d Magaza Özel Komisyonu", commission.ShopId)
+		description := fmt.Sprintf("%d Magaza Özel Komisyonu", commission.ShopId)
+		if _, ok := shopInfos[commission.ShopId]; ok {
+			name = fmt.Sprintf("%s + Magaza Özel Komisyonu", shopInfos[commission.ShopId].ShopNome)
+			description = fmt.Sprintf("%d - %s + Magaza Özel Komisyonu", commission.ShopId, shopInfos[commission.ShopId].ShopNome)
+		}
 		resp, err := csm.SendToNewCommissionService(models.CreateRuleRequest{
-			Name:           fmt.Sprintf("%d Magaza Komisyonu", commission.ShopId),
-			Description:    fmt.Sprintf("%d Magaza Komisyonu", commission.ShopId),
+			Name:           norm.NFC.String(name),
+			Description:    norm.NFC.String(description),
 			Type:           "contract",
 			Metadata:       nil,
-			TermInDays:     1,
 			MerchantID:     nil,
 			CommissionRate: commission.Ratio,
 			RuleType:       "merchant_id",
@@ -279,7 +293,7 @@ func (csm *CommissionServiceMigrate) CreateShopCommissions(commissions []elastic
 		}, commission.CreatedBy)
 
 		if err != nil {
-			log.GetLogger().Error("request error", err)
+			log.GetLogger().Error("request error", err, zap.String("shop_id", fmt.Sprintf("%d", commission.ShopId)))
 		} else {
 			fmt.Println(fmt.Sprintf("%d Mağaza Komisyonu oluşturuldu. Komisyon Id: %s", commission.ShopId, resp.Data.Id))
 		}
@@ -474,6 +488,13 @@ func (csm *CommissionServiceMigrate) getAndCreateProductCommissions() {
 }
 
 func (csm *CommissionServiceMigrate) CreateProductCommissions(commissions []elasticsearch_entities.Commission) {
+	var shopIds []int
+	for _, commission := range commissions {
+		shopIds = append(shopIds, commission.ShopId)
+	}
+
+	shopInfos := csm.getShopInfos(shopIds)
+
 	for _, commission := range commissions {
 		startDate := time.Now()
 		endDate := time.Now().Add(time.Hour * 24 * 365)
@@ -487,12 +508,19 @@ func (csm *CommissionServiceMigrate) CreateProductCommissions(commissions []elas
 		}
 
 		shopId := int32(commission.ShopId)
+
+		name := fmt.Sprintf("%d Ürün Komisyonu", commission.EntityId)
+		description := fmt.Sprintf("%d Ürün Komisyonu", commission.EntityId)
+		if _, ok := shopInfos[commission.ShopId]; ok {
+			name = fmt.Sprintf("%s - %d + Ürün Özel Komisyonu", shopInfos[commission.ShopId].ShopNome, commission.EntityId)
+			description = fmt.Sprintf("%s - %d + Ürün Özel Komisyonu", shopInfos[commission.ShopId].ShopNome, commission.EntityId)
+		}
+
 		resp, err := csm.SendToNewCommissionService(models.CreateRuleRequest{
-			Name:           fmt.Sprintf("%d Urun Komisyonu", commission.EntityId),
-			Description:    fmt.Sprintf("%d Urun Komisyonu", commission.EntityId),
+			Name:           norm.NFC.String(name),
+			Description:    norm.NFC.String(description),
 			Type:           "promotion",
 			Metadata:       nil,
-			TermInDays:     1,
 			MerchantID:     &shopId,
 			CommissionRate: commission.RatioDate,
 			RuleType:       "product",
@@ -515,4 +543,19 @@ func (csm *CommissionServiceMigrate) CreateProductCommissions(commissions []elas
 			//fmt.Println(fmt.Sprintf("%d Ürün Komisyonu oluşturuldu. Komisyon Id: %s", commission.EntityId, resp.Data.Id))
 		}
 	}
+}
+
+func (csm *CommissionServiceMigrate) getShopInfos(ids []int) map[int]entities.EShop {
+	var shopInfos []entities.EShop
+	csm.DB.
+		Where("shop_id IN (?)", ids).
+		Limit(len(ids)).
+		Find(&shopInfos)
+
+	shopIdMap := make(map[int]entities.EShop, len(ids))
+	for _, shopInfo := range shopInfos {
+		shopIdMap[shopInfo.ShopID] = shopInfo
+	}
+
+	return shopIdMap
 }

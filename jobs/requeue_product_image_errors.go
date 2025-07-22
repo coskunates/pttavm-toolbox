@@ -33,7 +33,7 @@ func (rpi *RequeueProductImageErrors) Run() {
 }
 
 func (rpi *RequeueProductImageErrors) getErrorImages() []mongo_entities.ProductImageWithError {
-	filters := bson.M{"shop_id": bson.M{"$in": []int{17844}}}
+	filters := bson.M{"shop_id": bson.M{"$in": []int{836849}}}
 
 	var productImages []mongo_entities.ProductImageWithError
 
@@ -95,8 +95,8 @@ func (rpi *RequeueProductImageErrors) addToRabbitMQ(wg *sync.WaitGroup, chunk []
 		messageBody, _ := json.Marshal(productImage)
 
 		err := rpi.PttAvmRabbitMQ.Publish(headers, &amqp.Delivery{
-			Exchange:   "images.add",
-			RoutingKey: "",
+			Exchange:   "product",
+			RoutingKey: "image",
 			Body:       []byte(base64.StdEncoding.EncodeToString(messageBody)),
 		})
 

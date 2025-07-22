@@ -10,6 +10,7 @@ import (
 	"my_toolbox/library/log"
 	"my_toolbox/library/mongodb_client"
 	"my_toolbox/library/mysql_client"
+	"my_toolbox/library/rabbitmq_client"
 	"os"
 	"reflect"
 	"strings"
@@ -46,11 +47,12 @@ func main() {
 
 	// Config'i oku ve library'leri başlat
 	cfg := config.GetConfig()
-	
+
 	// Library'leri config ile başlat
 	mysql_client.InitWithConfig(cfg.PttavmMySQL)
 	mongodb_client.InitWithConfig(cfg.PttavmMongo, cfg.ReviewMongo)
 	elasticsearch_client.InitWithConfig(cfg.PttavmElasticsearch, cfg.CommissionElasticsearch)
+	rabbitmq_client.InitWithConfig(cfg.PttavmRabbitMQ)
 
 	// Mevcut library'lerden connection'ları al
 	db := mysql_client.GetPttavmDB()
@@ -58,6 +60,10 @@ func main() {
 	reviewMongo := mongodb_client.GetReviewMongo()
 	elastic := elasticsearch_client.GetElasticSearch()
 	commissionElastic := elasticsearch_client.GetCommissionElasticSearch()
+	rabbitMq, err := rabbitmq_client.NewRabbitMQClient()
+	if err != nil {
+		panic(err)
+	}
 
 	// Job instance'ı oluştur ve connection'ları set et
 	jobInstance := &jobs.Job{
@@ -66,6 +72,7 @@ func main() {
 		ReviewMongo:       reviewMongo,
 		Elastic:           elastic,
 		CommissionElastic: commissionElastic,
+		PttAvmRabbitMQ:    rabbitMq,
 		Args:              params,
 	}
 
