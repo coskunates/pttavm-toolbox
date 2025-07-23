@@ -11,6 +11,7 @@ import (
 	"my_toolbox/library/ftp_client"
 	"my_toolbox/library/log"
 	"my_toolbox/library/mail_client"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -280,6 +281,14 @@ func (drla *DryRunLogAnalyzer) uploadToFtp(localFilePath string, date time.Time)
 	remoteSize, err := ftpClient.GetFileSize(remotePath)
 	if err == nil {
 		log.GetLogger().Info(fmt.Sprintf("Remote file size: %d bytes", remoteSize))
+	}
+
+	// FTP upload başarılı olduktan sonra local dosyayı sil
+	err = os.Remove(localFilePath)
+	if err != nil {
+		log.GetLogger().Error(fmt.Sprintf("Failed to delete local file after FTP upload: %s", localFilePath), err)
+	} else {
+		log.GetLogger().Info(fmt.Sprintf("Local file deleted successfully after FTP upload: %s", localFilePath))
 	}
 }
 
