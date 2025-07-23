@@ -32,8 +32,7 @@ type DryRunLogAnalyzer struct {
 
 func (drla *DryRunLogAnalyzer) Run() {
 	// 1 gün önceki tarihi hesapla
-	//yesterday := time.Now().AddDate(0, 0, -1)
-	yesterday := time.Now()
+	yesterday := time.Now().AddDate(0, 0, -1)
 	startOfDay := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, yesterday.Location())
 	endOfDay := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 23, 59, 59, 999999999, yesterday.Location())
 
