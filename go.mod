@@ -3,8 +3,10 @@ module my_toolbox
 go 1.22
 
 require (
+	github.com/elastic/go-elasticsearch/v8 v8.17.1
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/rabbitmq/amqp091-go v1.10.0
+	github.com/secsy/goftp v0.0.0-20200609142545-aa2de14babf4
 	go.mongodb.org/mongo-driver v1.10.6
 	go.uber.org/zap v1.27.0
 	golang.org/x/text v0.17.0
@@ -14,7 +16,6 @@ require (
 
 require (
 	github.com/elastic/elastic-transport-go/v8 v8.6.1 // indirect
-	github.com/elastic/go-elasticsearch/v8 v8.17.1 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect

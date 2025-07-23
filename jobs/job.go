@@ -431,3 +431,7 @@ func (j *Job) ProductListenerCleaner() IJob {
 func (j *Job) CommissionServiceMigrate() IJob {
 	return &CommissionServiceMigrate{Job: *j}
 }
+
+func (j *Job) DryRunLogAnalyzer() IJob {
+	return &DryRunLogAnalyzer{Job: *j}
+}

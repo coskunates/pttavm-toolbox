@@ -24,13 +24,13 @@ type CommissionServiceMigrate struct {
 }
 
 func (csm *CommissionServiceMigrate) Run() {
-	categoryCommissions := csm.getCategoryCommissions()
+	/*categoryCommissions := csm.getCategoryCommissions()
 
 	csm.CreateCategoryCommissions(categoryCommissions)
 
 	shopCommissions := csm.getShopCommissions()
 	csm.CreateShopCommissions(shopCommissions)
-
+	*/
 	csm.getAndCreateProductCommissions()
 }
 
@@ -269,16 +269,17 @@ func (csm *CommissionServiceMigrate) CreateShopCommissions(commissions []elastic
 		name := fmt.Sprintf("%d Magaza Özel Komisyonu", commission.ShopId)
 		description := fmt.Sprintf("%d Magaza Özel Komisyonu", commission.ShopId)
 		if _, ok := shopInfos[commission.ShopId]; ok {
-			name = fmt.Sprintf("%s + Magaza Özel Komisyonu", shopInfos[commission.ShopId].ShopNome)
-			description = fmt.Sprintf("%d - %s + Magaza Özel Komisyonu", commission.ShopId, shopInfos[commission.ShopId].ShopNome)
+			name = fmt.Sprintf("%s Magaza Özel Komisyonu", shopInfos[commission.ShopId].ShopNome)
+			description = fmt.Sprintf("%d - %s Magaza Özel Komisyonu", commission.ShopId, shopInfos[commission.ShopId].ShopNome)
 		}
+		merchantId := int32(commission.ShopId)
 		resp, err := csm.SendToNewCommissionService(models.CreateRuleRequest{
 			Name:           norm.NFC.String(name),
 			Description:    norm.NFC.String(description),
 			Type:           "contract",
 			Metadata:       nil,
-			MerchantID:     nil,
-			CommissionRate: commission.Ratio,
+			MerchantID:     &merchantId,
+			CommissionRate: ratio,
 			RuleType:       "merchant_id",
 			Filters: []models.RuleFilter{{
 				Field:  "merchant_id",
@@ -312,11 +313,8 @@ func (csm *CommissionServiceMigrate) getAndCreateProductCommissions() {
 						},
 					},
 					{
-						"range": map[string]interface{}{
-							"ratio_date": map[string]interface{}{
-								"gt":  0,
-								"lte": 40,
-							},
+						"term": map[string]interface{}{
+							"ratio_date": 0,
 						},
 					},
 				},
@@ -512,8 +510,8 @@ func (csm *CommissionServiceMigrate) CreateProductCommissions(commissions []elas
 		name := fmt.Sprintf("%d Ürün Komisyonu", commission.EntityId)
 		description := fmt.Sprintf("%d Ürün Komisyonu", commission.EntityId)
 		if _, ok := shopInfos[commission.ShopId]; ok {
-			name = fmt.Sprintf("%s - %d + Ürün Özel Komisyonu", shopInfos[commission.ShopId].ShopNome, commission.EntityId)
-			description = fmt.Sprintf("%s - %d + Ürün Özel Komisyonu", shopInfos[commission.ShopId].ShopNome, commission.EntityId)
+			name = fmt.Sprintf("%s \"%d\" Ürün Özel Komisyonu", shopInfos[commission.ShopId].ShopNome, commission.EntityId)
+			description = fmt.Sprintf("%s \"%d\" Ürün Özel Komisyonu", shopInfos[commission.ShopId].ShopNome, commission.EntityId)
 		}
 
 		resp, err := csm.SendToNewCommissionService(models.CreateRuleRequest{

@@ -1,0 +1,6 @@
+{{.Title}}
+
+Tarih: {{.Summary.Date}}
+Sonuc: {{.Summary.RecordCount}} farklilik tespit edildi
+Dosya: {{.Result.FileName}}
+Link: {{.Result.FileLink}} 

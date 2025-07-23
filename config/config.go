@@ -14,6 +14,27 @@ type Configuration struct {
 	PttavmElasticsearch     ElasticsearchConfig `json:"pttavm_elasticsearch"`
 	CommissionElasticsearch ElasticsearchConfig `json:"commission_elasticsearch"`
 	PttavmRabbitMQ          RabbitMQConfig      `json:"pttavm_rabbitmq"`
+	FtpServer               FtpConfig           `json:"ftp_server"`
+	InsiderMail             InsiderMailConfig   `json:"insider_mail"`
+	NotificationEmails      NotificationConfig  `json:"notification_emails"`
+}
+
+type InsiderMailConfig struct {
+	Endpoint string `json:"endpoint"`
+	AuthKey  string `json:"auth_key"`
+	Timeout  int    `json:"timeout"`
+}
+
+type NotificationConfig struct {
+	DryRunReports []string `json:"dry_run_reports"`
+}
+
+type FtpConfig struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Timeout  int    `json:"timeout"`
 }
 
 type RabbitMQConfig struct {
